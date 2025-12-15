@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Temperatura - Canal ThingSpeak</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h2 { color: #0072BD; }
+    #current { font-size: 48px; color: #0072BD; margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    canvas { max-width: 100%; height: 400px; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h2>Temperatura actual</h2>
+  <div id="current">Cargando...</div>
+
+  <h2>Evolución de la Temperatura (últimas 24h)</h2>
+  <canvas id="tempChart"></canvas>
+
+  <h2>Últimos registros</h2>
+  <table id="dataTable">
+    <tr><th>Fecha/Hora</th><th>Temperatura (°C)</th></tr>
+  </table>
+
+  <!-- Botón para descargar todos los registros -->
+  <button onclick="downloadData()">Descargar todos los registros (CSV)</button>
+
+  <script>
+    const channelID = 3201631;
+    const readAPIKey = "TU_READ_API_KEY"; // Sustituye por tu API Key de lectura
+    const results = 50; // nº de registros que quieres mostrar en la tabla
+
+    // URL para últimos registros (tabla + gráfica)
+    const url = `https://api.thingspeak.com/channels/${channelID}/fields/1.json?api_key=${readAPIKey}&results=${results}`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const feeds = data.feeds;
+        const temps = feeds.map(f => parseFloat(f.field1));
+        const times = feeds.map(f => new Date(f.created_at));
+
+        // Mostrar último valor
+        const lastValue = temps[temps.length - 1];
+        document.getElementById("current").innerText = lastValue.toFixed(2) + " °C";
+
+        // Crear gráfica con Chart.js
+        const ctx = document.getElementById('tempChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: times.map(t => t.toLocaleString()),
+            datasets: [{
+              label: 'Temperatura (°C)',
+              data: temps,
+              borderColor: '#0072BD',
+              backgroundColor: 'rgba(0,114,189,0.2)',
+              fill: true,
+              tension: 0.1
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                min: 10,
+                max: 40,
+                ticks: { stepSize: 5 }
+              }
+            }
+          }
+        });
+
+        // Rellenar tabla
+        const table = document.getElementById("dataTable");
+        feeds.forEach((f, i) => {
+          const row = table.insertRow();
+          row.insertCell(0).innerText = new Date(f.created_at).toLocaleString();
+          row.insertCell(1).innerText = temps[i].toFixed(2);
+        });
+      });
+
+    // Función para descargar todos los registros en CSV
+    function downloadData() {
+      const downloadUrl = `https://api.thingspeak.com/channels/${channelID}/fields/1.csv?api_key=${readAPIKey}`;
+      window.open(downloadUrl, '_blank');
+    }
+  </script>
+
+</body>
+</html>
