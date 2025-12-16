@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+acjil<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -20,7 +20,7 @@
   <h2>Temperatura actual</h2>
   <div id="current">Cargando...</div>
 
-  <h2>Evolución de la Temperatura (últimas 24h)</h2>
+  <h2>Evolución de la Temperatura despachil (últimas 24h)</h2>
   <canvas id="tempChart"></canvas>
 
   <h2>Últimos registros</h2>
@@ -34,7 +34,7 @@
   <script>
     const channelID = 3201631;
     const readAPIKey = "TUPAIKEY"; // Sustituye por tu API Key de lectura
-    const results = 150; // nº de registros que quieres mostrar en la tabla
+    const results = 200; // nº de registros que quieres mostrar en la tabla
 
     // URL para últimos registros (tabla + gráfica)
     const url = `https://api.thingspeak.com/channels/${channelID}/fields/1.json?api_key=${readAPIKey}&results=${results}`;
@@ -94,6 +94,7 @@
 
 </body>
 </html>
+
 
 
 
